@@ -38,3 +38,19 @@ def submit_login(request):
             messages.error(request, "Usuário ou senha inválidos")
     
     return redirect('/')
+
+@login_required(login_url='/login/')
+def evento(request):
+    return render(request, 'evento.html')
+
+@login_required(login_url='/login/')
+def submit_evento(request):
+    if request.POST:
+        titulo = request.POST.get('titulo')
+        descricao = request.POST.get('descricao')
+        data = request.POST.get('data')
+        usuario = request.user
+
+        Eventos.objects.create(titulo=titulo, descricao=descricao, data_evento=data, usuario=usuario)
+        
+    return redirect('/')
