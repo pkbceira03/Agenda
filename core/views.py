@@ -41,16 +41,39 @@ def submit_login(request):
 
 @login_required(login_url='/login/')
 def evento(request):
-    return render(request, 'evento.html')
+    id_evento = request.GET.get('id')
+    dados = {}
+    if id_evento:
+        dados['evento'] = Eventos.objects.get(id=id_evento)
+    return render(request, 'evento.html', dados)
 
 @login_required(login_url='/login/')
 def submit_evento(request):
     if request.POST:
         titulo = request.POST.get('titulo')
         descricao = request.POST.get('descricao')
-        data = request.POST.get('data')
+        data_evento = request.POST.get('data')
         usuario = request.user
+        id_evento = request.POST.get('id_evento')
 
-        Eventos.objects.create(titulo=titulo, descricao=descricao, data_evento=data, usuario=usuario)
-        
+        if id_evento:
+            evento = Eventos.objects.get(id=id_evento)
+            if evento.usuario == usuario:
+                evento.titulo = titulo
+                evento.descricao = descricao
+                evento.data_evento = data_evento
+                evento.save()
+            # Eventos.objects.filter(id=id_evento).update(titulo=titulo, descricao=descricao, data_evento=data, usuario=usuario)
+        else:
+            Eventos.objects.create(titulo=titulo, descricao=descricao, data_evento=data, usuario=usuario)
+
+    return redirect('/')
+
+@login_required(login_url='/login/')
+def delete_evento(request, id_evento):
+    usuario = request.user
+    evento = Eventos.objects.get(id=id_evento)
+
+    if usuario == evento.usuario:
+        evento.delete()
     return redirect('/')
